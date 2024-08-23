@@ -1,0 +1,10 @@
+com\mycompany\Controlador\LogicaArticuloControlador.class
+com\mycompany\Conexion\SQLArticulo.class
+com\mycompany\Modelo\Articulo.class
+com\mycompany\Conexion\ConexionMysql.class
+com\mycompany\Modelo\Cliente.class
+com\mycompany\Conexion\GestionCliente.class
+com\mycompany\Conexion\ConexionServidor.class
+com\mycompany\Conexion\SQLCliente.class
+com\mycompany\proyectoclienteservidor_serverv2\ProyectoClienteServidor_ServerV2.class
+com\mycompany\Controlador\LogicaClienteControlador.class
