@@ -2,14 +2,15 @@
 
 # Proyecto Cliente-Servidor Concurrente
 
-Logros
+# Logros
 -Gson para serializar la informacion
 -Conexino clinete servidor 
 -Vista de invitados
 -Log in
 -Verificacion de usuarios
-Pendinte
+# Pendinte
 -Carrito de compras
+-Menjo de fondos 
 
 
 ## Descripción
