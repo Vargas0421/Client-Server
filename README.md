@@ -2,6 +2,16 @@
 
 # Proyecto Cliente-Servidor Concurrente
 
+Logros
+-Gson para serializar la informacion
+-Conexino clinete servidor 
+-Vista de invitados
+-Log in
+-Verificacion de usuarios
+Pendinte
+-Carrito de compras
+
+
 ## Descripción
 Este proyecto es una aplicación cliente-servidor que utiliza Java y está diseñada para gestionar el inventario de una tienda y este implica el manejo de ussuarios ususarios y articulos. El proyecto incluye funcionalidades para registrar nuevos clientes, registrar articulos, realizar compras. 
 
