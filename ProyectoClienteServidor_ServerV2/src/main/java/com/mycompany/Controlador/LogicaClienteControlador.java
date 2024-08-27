@@ -19,7 +19,6 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
-
 public class LogicaClienteControlador {
 
     DefaultTableModel modelo = new DefaultTableModel();
@@ -47,7 +46,7 @@ public class LogicaClienteControlador {
                     listaClientes.add(cliente);
                 }
             } catch (SQLException ex) {
-                            Logger.getLogger(SQLCliente.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SQLCliente.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         return listaClientes;
@@ -59,6 +58,22 @@ public class LogicaClienteControlador {
         return json;
     }
 
+   /* public String mantenerClienteDuranteLaSesion(String json, Cliente c) {
+        Gson gson = new Gson();
+        Cliente cliente = gson.fromJson(json, Cliente.class);
+        String clienteRegistrado = null;
+
+        return clienteRegistrado;
+    }
+
+    public Cliente eviarClienteAestion(String json) {
+        Cliente a = validacionDeSesion(json);
+
+        return a;
+    }*/
+    
+    
+
     public void registrarUsuario(String json) {
         SQLCliente modSql = new SQLCliente();
         Gson gson = new Gson();
@@ -69,6 +84,12 @@ public class LogicaClienteControlador {
         } else {
             JOptionPane.showMessageDialog(null, "Error al guardar");
         }
+    }
+
+    public String devolverClienteRegistradoAlCliente(Cliente cliente) {
+        Gson gson = new Gson();
+        String json = gson.toJson(cliente); 
+        return json;
     }
 
     private Cliente validacionDeSesion(String json) {
@@ -89,8 +110,6 @@ public class LogicaClienteControlador {
                     cliente.setCorreo(rs.getString("correo"));
                     cliente.setId_tipo(rs.getInt("id_tipo"));
                     cliente.setBilletera(rs.getDouble("billetera"));
-                    
-                    JOptionPane.showMessageDialog(null, cliente.toString());
                 }
             }
         } catch (SQLException ex) {
@@ -99,12 +118,17 @@ public class LogicaClienteControlador {
 
         return cliente;
     }
-    
+
+    public Cliente pasarCliente(String a) {
+        Gson gson = new Gson();
+        Cliente cliente = gson.fromJson(a, Cliente.class);
+        return cliente;
+    }
+
     public String jsonValidacionCliente(String jason) {
         Gson gson = new Gson();
         String json = gson.toJson(validacionDeSesion(jason));
         return json;
     }
-    
 
 }

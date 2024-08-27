@@ -1,5 +1,6 @@
 package com.mycompany.Conexion;
 
+import com.mycompany.Modelo.Cliente;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -7,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JOptionPane;
 
 public class ConexionServidor {
 
@@ -28,11 +28,9 @@ public class ConexionServidor {
     }
 
     public void iniciarSesion() {
-        JOptionPane.showMessageDialog(null, "Servidor iniciado y esperando clientes...");
         while (true) {
             try {
                 Socket s1 = this.server.accept();
-                JOptionPane.showMessageDialog(null, "Cliente aceptado: " + s1.getInetAddress());
                 GestionCliente gestion = new GestionCliente(s1);
                 gestion.start();
                 ingresarGestion(gestion);

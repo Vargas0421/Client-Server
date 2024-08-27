@@ -13,11 +13,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Logger;
+import java.util.logging.Level;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class LogicaArticuloControlador {
+
+    private static final Logger LOGGER = Logger.getLogger(LogicaArticuloControlador.class.getName());
 
     ConexionMysql con = new ConexionMysql(); // se crean las variables necesarias para la coneccion
     Connection cn = con.getConection();
@@ -57,6 +62,75 @@ public class LogicaArticuloControlador {
                 e.printStackTrace();
             }
         }
+    }
+
+    public boolean procesarCompra(String json) {
+        List<Articulo> listaArticulosEnElServidor = obtenerArticulosLista();
+        List<Articulo> listaArticulosEnElCarrito = new LinkedList<>();
+
+        // Parsear el JSON a una lista de artículos del carrito
+        Gson gson = new Gson();
+        Articulo[] articulos = gson.fromJson(json, Articulo[].class);
+        for (Articulo articulo : articulos) {
+            listaArticulosEnElCarrito.add(articulo);
+        }
+
+        // Validar si el carrito puede ser procesado con el inventario disponible
+        if (!validarCompraCarritoDeCompras(listaArticulosEnElServidor, listaArticulosEnElCarrito)) {
+            return false; // Validación fallida
+        }
+
+        // Actualizar inventario en la base de datos
+        return actualizarInventario(listaArticulosEnElCarrito);
+    }
+
+    private boolean actualizarInventario(List<Articulo> articulos) {
+        String sql = "UPDATE articulos SET cantidad = cantidad - ? WHERE id = ?";
+        try (Connection connection = con.getConection(); PreparedStatement ps = connection.prepareStatement(sql)) {
+
+            connection.setAutoCommit(false); // Inicia la transacción
+
+            for (Articulo articulo : articulos) {
+                ps.setInt(1, articulo.getCantidad());
+                ps.setInt(2, articulo.getId());
+                ps.addBatch();
+            }
+
+            ps.executeBatch();
+            connection.commit(); // Confirma la transacción
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try (Connection connection = con.getConection()) {
+                if (connection != null) {
+                    connection.rollback(); // Revierte en caso de error
+                }
+            } catch (SQLException rollbackEx) {
+                rollbackEx.printStackTrace();
+            }
+            return false;
+        }
+    }
+
+    private boolean validarCompraCarritoDeCompras(List<Articulo> listaArticulosEnElServidor, List<Articulo> listaArticulosEnElCarrito) {
+        for (Articulo articuloEnCarrito : listaArticulosEnElCarrito) {
+            boolean encontrado = false;
+            for (Articulo articuloEnServidor : listaArticulosEnElServidor) {
+                if (articuloEnServidor.getId() == articuloEnCarrito.getId()) {
+                    if (articuloEnServidor.getCantidad() < articuloEnCarrito.getCantidad()) {
+                        LOGGER.log(Level.WARNING, "No hay suficiente inventario para el artículo con ID: " + articuloEnCarrito.getId());
+                        return false;
+                    }
+                    encontrado = true;
+                    break;
+                }
+            }
+            if (!encontrado) {
+                LOGGER.log(Level.WARNING, "Artículo no encontrado en el inventario con ID: " + articuloEnCarrito.getId());
+                return false;
+            }
+        }
+        return true;
     }
 
     private List<Articulo> obtenerArticulosLista() {

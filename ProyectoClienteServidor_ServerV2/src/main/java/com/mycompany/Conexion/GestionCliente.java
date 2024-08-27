@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.mycompany.Controlador.LogicaArticuloControlador;
 import com.mycompany.Controlador.LogicaClienteControlador;
+import com.mycompany.Modelo.Cliente;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -17,51 +18,73 @@ public class GestionCliente extends Thread {
     private Socket cliente;
     private LogicaClienteControlador logicaClienteControlador = new LogicaClienteControlador();
     private LogicaArticuloControlador logicaArticuloControlador = new LogicaArticuloControlador();
-    //private DataInputStream dis;
-    //private DataOutputStream dos;
+    private final Object lock = new Object(); // Objeto de bloqueo para sincronización
+    Cliente clienteRegistrado;
 
     public GestionCliente(Socket cliente) {
         this.cliente = cliente;
-        //this.dis = new DataInputStream(cliente.getInputStream());
-        //this.dos = new DataOutputStream(cliente.getOutputStream());
-        // this.logicaClienteControlador = new LogicaClienteControlador();
-        //this.logicaArticuloControlador = new LogicaArticuloControlador();
+
+    }
+
+    public GestionCliente(Socket cliente, Cliente cliente1) {
+        this.cliente = cliente;
+        this.clienteRegistrado = cliente1;
+
     }
 
     public String procesar(String inputMe) {
-
         Gson gson = new Gson();
-        JsonObject jsonObj = gson.fromJson(inputMe, JsonObject.class);
-        int idDeMetodo = jsonObj.get("idDeMetodo").getAsInt();
-        switch (idDeMetodo) {
-            case 1://Funcion para registar un cliente
-                logicaClienteControlador.registrarUsuario(inputMe);
-                break;
-            case 2:
-                logicaArticuloControlador.actualizarArticulo(inputMe);
-            case 3:
-                logicaArticuloControlador.registrarArticulo(inputMe);
-                break;
-            case 4:
-                return logicaArticuloControlador.jsonArticulos();
-            case 5:
-                return logicaArticuloControlador.jsonArticulos();
-            case 6:
-                return logicaClienteControlador.jsonValidacionCliente(inputMe);
-            case 7:
-                //JOptionPane.showMessageDialog(null, logicaClienteControlador.jsonClientes());
-                return logicaClienteControlador.jsonClientes();
+        JsonObject jsonObj;
+        int idDeMetodo;
+        String jsonData = "";
 
-        }
+            if (inputMe.contains("|")) {
+                String[] partes = inputMe.split("\\|", 2);
+                idDeMetodo = Integer.parseInt(partes[0].trim());
+                jsonData = partes[1].trim();
+            } else {
+                jsonObj = gson.fromJson(inputMe, JsonObject.class);
+                idDeMetodo = jsonObj.get("idDeMetodo").getAsInt();
+                jsonData = inputMe; // El JSON completo es el inputMe
+            }
+
+            switch (idDeMetodo) {
+                case 1:
+                    logicaClienteControlador.registrarUsuario(inputMe);
+                    break;
+                case 2:
+                    logicaArticuloControlador.actualizarArticulo(inputMe);
+                    break;
+                case 3:
+                    logicaArticuloControlador.registrarArticulo(inputMe);
+                    break;
+                case 4:
+                    return logicaArticuloControlador.jsonArticulos();
+                case 5:
+                    return logicaArticuloControlador.jsonArticulos();
+                case 6:
+                    String a = logicaClienteControlador.jsonValidacionCliente(inputMe);
+                    clienteRegistrado = gson.fromJson(a, Cliente.class); // Actualiza el cliente registrado
+                    JOptionPane.showMessageDialog(null, "El cliente registrado es (caso 6): " + clienteRegistrado.toString());
+                    return a;
+                case 7:
+                    return logicaClienteControlador.jsonClientes();
+                case 8:
+                    JOptionPane.showMessageDialog(null, "El cliente registrado es (caso 8): " + clienteRegistrado.toString());
+                    return logicaClienteControlador.devolverClienteRegistradoAlCliente(clienteRegistrado);
+                case 9:
+                    if (logicaArticuloControlador.procesarCompra(jsonData)) {
+                        return "Success";
+                    }
+                    break;
+                default:
+                    // Manejo de casos no definidos
+                    return "Método no soportado";
+            }
+        
+
         cerrarRecursos();
         return "";
-    }
-
-    private String recibirMensaje(String a) throws IOException {
-        return a;
-    }
-
-    private void enviarMensaje(String mensaje) throws IOException {
     }
 
     public void cerrarRecursos() {
@@ -76,18 +99,21 @@ public class GestionCliente extends Thread {
 
     @Override
     public void run() {
-
         DataInputStream dis;
         try {
-            dis = new DataInputStream(this.cliente.getInputStream());
-            String inputM = dis.readUTF();
-            String respond = procesar(inputM);
-            DataOutputStream dos = new DataOutputStream(this.cliente.getOutputStream());
-            dos.writeUTF(respond);
-            dos.close();
-            dis.close();
+            while (true) {
+                dis = new DataInputStream(this.cliente.getInputStream());
+                String inputM = dis.readUTF();
+                String respond = procesar(inputM);
+                DataOutputStream dos = new DataOutputStream(this.cliente.getOutputStream());
+                dos.writeUTF(respond);
+                dis.close();
+                dos.close();
+            }
         } catch (IOException ex) {
             Logger.getLogger(GestionCliente.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            cerrarRecursos();
         }
     }
 
