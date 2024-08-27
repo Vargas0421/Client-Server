@@ -35,15 +35,27 @@ public class ConecxionCliente {
     public void enviarInformacion(String informacinoParaEnviar) throws IOException {
         DataOutputStream dos = new DataOutputStream(cliente.getOutputStream());
         dos.writeUTF(informacinoParaEnviar);
+              
 
     }
+    
+    public String recibirinformacion(String a) throws IOException{
+        enviarInformacion(a);
+         DataInputStream dis = new DataInputStream(cliente.getInputStream());
+         String mensajerecibido;
+         mensajerecibido = dis.readUTF();
+         
+         return mensajerecibido;
+    }
+    
+    
 
     public String iniciarConexion(String Jason) {
 
         String a = "";
         try {
             a = gestionarCliente(Jason);
-            cliente.close();
+           // cliente.close();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -52,3 +64,4 @@ public class ConecxionCliente {
     }
 
 }
+

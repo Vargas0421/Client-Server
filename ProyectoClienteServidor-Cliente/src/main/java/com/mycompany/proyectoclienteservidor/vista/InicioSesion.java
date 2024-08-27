@@ -18,9 +18,8 @@ import javax.swing.JOptionPane;
  */
 public class InicioSesion extends javax.swing.JFrame {
 
-    /**
-     * Creates new form InicioSesion
-     */
+    protected final Cliente clienteRegistrado = new Cliente();
+
     public InicioSesion() {
         initComponents();
     }
@@ -125,7 +124,6 @@ public class InicioSesion extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     public Cliente obtenerClienteDesdeFormulario() throws IllegalArgumentException {
-        Cliente cliente = new Cliente();
 
         String correo = jTextField1.getText().trim();
         String password = new String(jPasswordField1.getPassword()).trim();
@@ -133,11 +131,11 @@ public class InicioSesion extends javax.swing.JFrame {
         if (correo.isEmpty() || password.isEmpty()) {
             throw new IllegalArgumentException("Por favor, ingresa tu correo y contraseña.");
         }
-        cliente.setCorreo(correo);
-        cliente.setPassword(password);
-        cliente.setIdDeMetodo(6);
+        clienteRegistrado.setCorreo(correo);
+        clienteRegistrado.setPassword(password);
+        clienteRegistrado.setIdDeMetodo(6);
 
-        return cliente;
+        return clienteRegistrado;
     }
 
     private void btnSingInActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSingInActionPerformed
@@ -146,14 +144,14 @@ public class InicioSesion extends javax.swing.JFrame {
 
     public Cliente enviarClienteClases() {
         Cliente clienteVerificado = null;  // Initialize the variable
-
         try {
             Cliente cliente = obtenerClienteDesdeFormulario(); // Obtain the Cliente object
             Gson gson = new Gson();
             String json = gson.toJson(cliente);
             ConecxionCliente conexion = new ConecxionCliente();
-            String jasonRecibido = conexion.iniciarConexion(json);
+            String jasonRecibido = conexion.recibirinformacion(json);
             clienteVerificado = gson.fromJson(jasonRecibido, Cliente.class);
+            JOptionPane.showMessageDialog(null, "este es el cliente que se recibe en el inicio de sesion" + clienteVerificado.toString());
             vistaSegunCliente(clienteVerificado);
         } catch (IllegalArgumentException e) {
             JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -163,8 +161,7 @@ public class InicioSesion extends javax.swing.JFrame {
 
         return clienteVerificado;  // Return the verified Cliente object
     }
-    
-    
+
     private void vistaSegunCliente(Cliente a) {
         if (a.getId_tipo() == 1) {
             Adminitrar admin = new Adminitrar();
@@ -172,14 +169,13 @@ public class InicioSesion extends javax.swing.JFrame {
             this.dispose();
         } else if (a.getNombre() != null && a.getApellido() != null) {
             VistaClienteregistrado visualizacion = new VistaClienteregistrado();
-            visualizacion.recibirUsuario(a);
-            visualizacion.actualizarVistaConCliente(a);
             visualizacion.setVisible(true);
             this.dispose();
-            JOptionPane.showMessageDialog(null, "Se recibio esto" + a.toString());
-            //pendiente agregar loq ue el la logica de un usaurio normal
+        } else {
+            JOptionPane.showMessageDialog(null, "No has ingresado un usuario válido", "Advertencia", JOptionPane.WARNING_MESSAGE);
         }
     }
+
 
     private void btnAtras1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAtras1ActionPerformed
         Inicio inicio = new Inicio();

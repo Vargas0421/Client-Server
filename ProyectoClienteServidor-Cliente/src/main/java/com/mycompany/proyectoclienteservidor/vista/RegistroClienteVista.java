@@ -181,6 +181,19 @@ public class RegistroClienteVista extends javax.swing.JFrame {
         }
     }
 
+    private boolean validacionDeEspacios() {
+        boolean a = false;
+
+        if (txtApellido != null && txtNombre != null && txtConfirmPassword != null && txtPassword1 != null && txtCorreo != null) {
+            a = true;
+        } else {
+            JOptionPane.showMessageDialog(null, "Debes llenar todos los espacios", "Advertencia", JOptionPane.WARNING_MESSAGE);
+
+        }
+
+        return a;
+    }
+
     private String contras() {
         String a = null;
         String password = new String(txtPassword1.getPassword());
@@ -224,14 +237,17 @@ public class RegistroClienteVista extends javax.swing.JFrame {
     }//GEN-LAST:event_txtAdminValidationActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        Cliente cliente = RegitrarBoton();
-        Gson gson = new Gson();
-        String json = gson.toJson(cliente);
-        ConecxionCliente conexion = new ConecxionCliente();
-        try {
-            conexion.enviarInformacion(json);
-        } catch (IOException ex) {
-            Logger.getLogger(RegistroClienteVista.class.getName()).log(Level.SEVERE, null, ex);
+        if (validacionDeEspacios()) {
+            Cliente cliente = RegitrarBoton();
+            Gson gson = new Gson();
+            String json = gson.toJson(cliente);
+            ConecxionCliente conexion = new ConecxionCliente();
+
+            try {
+                conexion.enviarInformacion(json);
+            } catch (IOException ex) {
+                Logger.getLogger(RegistroClienteVista.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }//GEN-LAST:event_jButton2ActionPerformed
 
